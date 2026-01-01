@@ -55,8 +55,9 @@ export const BetActionDialog: Component<Props> = (props) => {
             </ActionButton>
 
             <ActionButton
+              disabled={props.allInAmount <= props.callAmount}
               onClick={() => setView('raise')}
-              extraClasses="w-20 h-16 from-amber-400 to-amber-600 border-amber-300"
+              extraClasses="w-20 h-16 from-amber-400 to-amber-600 border-amber-300 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
             >
               <span class="font-bold text-sm tracking-wide text-amber-950">
                 {props.callAmount === 0 && !props.preFlop ? 'BET' : 'RAISE'}
@@ -91,6 +92,7 @@ interface ActionButtonProps {
   onClick: () => void;
   extraClasses: string;
   autofocus?: boolean;
+  disabled?: boolean;
 }
 
 const ActionButton: Component<ActionButtonProps> = (props) => {
@@ -98,6 +100,7 @@ const ActionButton: Component<ActionButtonProps> = (props) => {
     <button
       type="button"
       autofocus={props.autofocus}
+      disabled={props.disabled}
       onClick={() => props.onClick()}
       class={`
         flex flex-col items-center justify-center
