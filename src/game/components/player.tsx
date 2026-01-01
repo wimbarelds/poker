@@ -2,11 +2,14 @@ import type { Component } from 'solid-js';
 
 import { createMemo, Index, Show } from 'solid-js';
 
-import type { BetInfo, Chip, ChipValue, Player } from '@/types';
+import type { BetInfo, Card, Chip, ChipValue, Player } from '@/types';
 
 import { chipBases } from '@/constants';
+import { isDebug } from '@/util/debug';
 
+import { calculateWinChance } from '../util/calculate-win-chance';
 import { createArr } from '../util/create-arr';
+import { selectCommunityCards, selectPlayerCards } from '../util/select-cards';
 import { ChipUI } from './chip';
 
 type BatchedChip = Chip & { batchNumber: number; batchIndex: number };
@@ -16,6 +19,8 @@ interface Props {
   playerIndex: number;
   active: boolean;
   isDealer: boolean;
+  allPlayers: Player[];
+  allCards: Card[];
 }
 
 export const PlayerUI: Component<Props> = (props) => {
@@ -24,6 +29,16 @@ export const PlayerUI: Component<Props> = (props) => {
   const lastAction = createMemo(() => {
     const [action] = latestRound().at(-1) ?? ['', 0];
     return action;
+  });
+
+  const debugWinChance = createMemo(() => {
+    if (!isDebug() || props.player.folded) return null;
+    const hand = selectPlayerCards(props.player, props.allPlayers, props.allCards);
+    const community = selectCommunityCards(props.allCards);
+    const othersActive = props.allPlayers.filter((p) => p !== props.player && !p.folded);
+    if (othersActive.length === 0) return 1;
+
+    return calculateWinChance(hand, community, props.player, othersActive, 1000);
   });
 
   return (
@@ -38,13 +53,33 @@ export const PlayerUI: Component<Props> = (props) => {
             D
           </div>
         </Show>
-        <h3 class="player-name text-center">{props.player.name}</h3>
-        <p class="player-money flex justify-between gap-1">
-          <strong>Money:</strong> {props.player.money}
-        </p>
-        <p class="player-bet flex justify-between gap-1">
-          <strong>Bet:</strong> {props.player.bet}
-        </p>
+        <h3 class="player-name text-center font-bold mb-1">{props.player.name}</h3>
+        <dl class="text-xs">
+          <div class="flex justify-between gap-1">
+            <dt class="font-bold">Money:</dt>
+            <dd>{props.player.money}</dd>
+          </div>
+          <div class="flex justify-between gap-1">
+            <dt class="font-bold">Bet:</dt>
+            <dd>{props.player.bet}</dd>
+          </div>
+          <Show when={isDebug()}>
+            <div class="mt-1 pt-1 border-t border-white/10 opacity-70 text-[10px]">
+              <Show when={!props.player.controlled}>
+                <div class="flex justify-between gap-2">
+                  <dt>Type:</dt>
+                  <dd class="font-bold uppercase">{props.player.archtype.id}</dd>
+                </div>
+              </Show>
+              <div class="flex justify-between gap-2">
+                <dt>Win%:</dt>
+                <dd class="font-mono">
+                  {debugWinChance() !== null ? (debugWinChance()! * 100).toFixed(1) : '-'}%
+                </dd>
+              </div>
+            </div>
+          </Show>
+        </dl>
       </div>
       <Show when={betChipStacks().length}>
         <div class="player-bet-chips" data-num-batches={latestRound().length}>

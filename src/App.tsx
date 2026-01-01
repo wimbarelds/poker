@@ -1,4 +1,4 @@
-import { createEffect, createSignal, For, untrack, type Component } from 'solid-js';
+import { createEffect, createMemo, createSignal, For, untrack, type Component } from 'solid-js';
 
 import type { Stage } from './types';
 
@@ -17,7 +17,6 @@ import { createShuffledDeck } from './game/util/create-deck';
 import { createPlayer } from './game/util/create-player';
 import { getNextGameStage } from './game/util/get-next-game-stage';
 import { showdown } from './game/util/showdown';
-import { delay } from './util/delay';
 
 const playerName = 'You';
 const otherPlayerNames = [...playerNames].getRandom(numPlayers - 1);
@@ -181,6 +180,9 @@ const App: Component = () => {
     });
   });
 
+  const allPlayersMemo = createMemo(() => players.map(([p]) => p()));
+  const allCardsMemo = createMemo(() => getCards().map(([c]) => c()));
+
   return (
     <>
       <div style={{ '--active-index': getActivePlayerIndex(), '--num-players': players.length }}>
@@ -194,6 +196,8 @@ const App: Component = () => {
               playerIndex={index()}
               active={index() === getActivePlayerIndex()}
               isDealer={index() === getDealerIndex()}
+              allPlayers={allPlayersMemo()}
+              allCards={allCardsMemo()}
             />
           )}
         </For>

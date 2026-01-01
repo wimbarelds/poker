@@ -2,6 +2,7 @@ import type { Signal } from 'solid-js';
 
 import type { Card, Player } from '@/types';
 
+import { isDebug } from '@/util/debug';
 import { delay } from '@/util/delay';
 
 function getActivePlayerIndexes(playerSignals: Signal<Player>[]) {
@@ -30,7 +31,7 @@ export async function dealCards(cardSignals: Signal<Card>[], playerSignals: Sign
         location: 'player',
         locationIndex,
         locationSubIndex,
-        showFace: player.controlled,
+        showFace: player.controlled || isDebug(),
       }));
     }
     // Wait an additional 250ms after each player's cards

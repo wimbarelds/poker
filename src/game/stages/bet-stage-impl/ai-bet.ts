@@ -3,6 +3,7 @@ import type { Setter } from 'solid-js';
 import type { BetInfo, Card, Player } from '@/types';
 
 import { blind, startingMoney } from '@/constants';
+import { calculateMaxStake } from '@/game/util/calculate-max-raise';
 import { selectCommunityCards, selectPlayerCards } from '@/game/util/select-cards';
 
 import { calculateWinChance } from '../../util/calculate-win-chance';
@@ -38,26 +39,33 @@ function getRaiseAmount(
   winChance: number,
   potSize: number,
   isBluffing: boolean,
+  maxStake: number,
 ): { amount: number; reason: string } {
+  const maxBet = Math.min(player.money, Math.max(0, maxStake - player.bet));
+
   // If desperate with decent chance of winning, go all in
   if (desperation > 0.75 && winChance > 0.4) {
-    return { amount: player.money, reason: 'desperate-value' };
+    return { amount: maxBet, reason: 'desperate-value' };
   }
   // If we really really want to bluff, or our hand is great
   if (isBluffing && Math.random() < Math.pow(Math.max(bluff, winChance), 5)) {
-    return { amount: player.money, reason: 'bluff-all-in' };
+    return { amount: maxBet, reason: 'bluff-all-in' };
   }
 
   // If our target bet is higher than 90% of our money, go all in
   const allInThreshold = player.money * 0.9;
 
   // If pre-flop, either 2x cost to call or 3x blind
-  const targetBet = isPreFlop
+  let targetBet = isPreFlop
     ? Math.max(costToCall * 2, blind * 3)
     : Math.max(costToCall * 3, Math.round(potSize * 0.5));
-  if (targetBet >= allInThreshold) return { amount: player.money, reason: 'threshold' };
 
-  return { amount: targetBet, reason: 'standard' };
+  if (targetBet >= allInThreshold) targetBet = player.money;
+
+  return {
+    amount: Math.min(targetBet, maxBet),
+    reason: targetBet >= allInThreshold ? 'threshold' : 'standard',
+  };
 }
 
 function handleAIAction(actionInfo: BetInfo, setPlayer: Setter<Player>) {
@@ -120,6 +128,8 @@ export function calculateAIAction(
   const minCallThreshold = 0.75 + Math.max(0, callPercentage - 0.02) * 3.125;
   const callThreshold = Math.min(2.0, minCallThreshold) * riskAdjustment;
 
+  const maxStake = calculateMaxStake(player, players);
+
   // 1. Initial Bluff Check
   if (Math.random() < bluff) {
     const { amount, reason } = getRaiseAmount(
@@ -131,6 +141,7 @@ export function calculateAIAction(
       winChance,
       potSize,
       true,
+      maxStake,
     );
     if (amount === player.money) return ['all-in', amount, `bluff-init:${reason}`];
     if (!isPreFlop && costToCall === 0) return ['bet', amount, `bluff-init:${reason}`];
@@ -155,6 +166,7 @@ export function calculateAIAction(
         winChance,
         potSize,
         false,
+        maxStake,
       );
       if (amount === player.money) return ['all-in', amount, `value-bet:${reason}`];
       if (isPreFlop) return ['raise', amount, `value-bet:${reason}`];
@@ -184,6 +196,7 @@ export function calculateAIAction(
       winChance,
       potSize,
       false,
+      maxStake,
     );
     return [amount === player.money ? 'all-in' : 'raise', amount, `value-raise:${reason}`];
   }

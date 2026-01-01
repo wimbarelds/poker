@@ -5,6 +5,7 @@ import { createSignal, Match, Switch } from 'solid-js';
 import type { BetInfo, Player } from '@/types';
 
 import { smallBlind } from '@/constants';
+import { calculateMaxStake } from '@/game/util/calculate-max-raise';
 
 import type { DialogFormProps } from './show-form-dialog';
 
@@ -213,7 +214,11 @@ export function showBetActionDialog(
   isPreFlop: boolean,
 ) {
   const player = players[activePlayerIndex];
-  const allInAmount = player.money;
+
+  const maxStake = calculateMaxStake(player, players);
+  const maxBetInCurrentRound = Math.max(0, maxStake - player.bet);
+  const allInAmount = Math.min(player.money, maxBetInCurrentRound);
+
   const highestBet = Math.max(...players.map((p) => p.bet));
   const callAmount = Math.min(allInAmount, highestBet - player.bet);
   return showFormDialog(BetActionDialog, { allInAmount, callAmount, preFlop: isPreFlop });
