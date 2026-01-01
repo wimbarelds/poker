@@ -5,8 +5,10 @@ import { defineConfig, mergeConfig } from 'vite';
 import solidPlugin from 'vite-plugin-solid';
 import { defineConfig as defineVitestConfig } from 'vitest/config';
 
+import { vitePluginGhPagesBase } from './src/vite/vite-plugin-ghpages-base';
+
 const viteConfig = defineConfig({
-  plugins: [devtools(), solidPlugin(), tailwindcss()],
+  plugins: [devtools(), solidPlugin(), tailwindcss(), vitePluginGhPagesBase()],
   resolve: {
     alias: {
       '@': resolve(import.meta.dirname, 'src'),
