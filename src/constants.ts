@@ -24,6 +24,7 @@ export const gameStages = [
   'turn',
   'bet3',
   'river',
+  'bet4',
   'showdown',
   'result',
 ] as const;

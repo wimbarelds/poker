@@ -80,119 +80,102 @@ const App: Component = () => {
     const stage = getGameStage();
 
     await untrack(async () => {
-      if (stage === 'deal') {
-        const playablePlayers = players.filter(([p]) => p().money > 0);
-        if (playablePlayers.length < 2) {
-          setGameStage('result');
-          return;
-        }
-
-        setCards(getCleanShuffledDeck());
-        players.forEach(([, setPlayer]) =>
-          setPlayer((player) => ({
-            ...player,
-            bet: 0,
-            allIn: false,
-            folded: player.money === 0,
-            hasActed: false,
-            betHistory: [...player.betHistory, []],
-          })),
-        );
-        await dealCards(getCards(), players);
-        setGameStage(getNextGameStage);
-      } else if (stage === 'bet1') {
-        setActivePlayerIndex(findNextActor((getDealerIndex() + 1) % numPlayers));
-        if (!shouldSkipBetting()) {
-          await betStage(
-            getCards().map(([getCard]) => getCard()),
-            players,
-            activePlayerIndexSignal,
-            true,
-          );
-        }
-        if (checkEarlyEnd()) return;
-        setGameStage(getNextGameStage);
-      } else if (stage === 'flop') {
-        await dealCommunity(getCards(), 'flop');
-        players.forEach(([, setPlayer]) =>
-          setPlayer((player) => ({
-            ...player,
-            hasActed: false,
-          })),
-        );
-        setGameStage(getNextGameStage);
-      } else if (stage === 'bet2') {
-        setActivePlayerIndex(findNextActor((getDealerIndex() + 1) % numPlayers));
-        if (!shouldSkipBetting()) {
-          await betStage(
-            getCards().map(([getCard]) => getCard()),
-            players,
-            activePlayerIndexSignal,
-            false,
-          );
-        }
-        if (checkEarlyEnd()) return;
-        setGameStage(getNextGameStage);
-      } else if (stage === 'turn') {
-        await dealCommunity(getCards(), 'turn');
-        players.forEach(([, setPlayer]) =>
-          setPlayer((player) => ({
-            ...player,
-            hasActed: false,
-          })),
-        );
-        setGameStage(getNextGameStage);
-      } else if (stage === 'bet3') {
-        setActivePlayerIndex(findNextActor((getDealerIndex() + 1) % numPlayers));
-        if (!shouldSkipBetting()) {
-          await betStage(
-            getCards().map(([getCard]) => getCard()),
-            players,
-            activePlayerIndexSignal,
-            false,
-          );
-        }
-        if (checkEarlyEnd()) return;
-        setGameStage(getNextGameStage);
-      } else if (stage === 'river') {
-        await dealCommunity(getCards(), 'river');
-        await delay(1000);
-        setGameStage('showdown');
-      } else if (stage === 'showdown') {
-        const results = showdown(
-          getCards().map(([c]) => c()),
-          players.map(([p]) => p()),
-        );
-
-        // Winner logic: Give pot to winners
-        const pot = players.map(([p]) => p().bet).sum();
-        const winners = results.filter((r) => r.handValue.score === results[0].handValue.score);
-        const splitPot = Math.floor(pot / winners.length);
-
-        winners.forEach((w) => {
-          // Find the player index to update their money
-          const pIdx = players.findIndex(([p]) => p().name === w.player.name);
-          if (pIdx !== -1) {
-            const [, setPlayer] = players[pIdx];
-            setPlayer((p) => ({ ...p, money: p.money + splitPot }));
+      switch (stage) {
+        case 'deal': {
+          const playablePlayers = players.filter(([p]) => p().money > 0);
+          if (playablePlayers.length < 2) {
+            setGameStage('result');
+            return;
           }
-        });
 
-        await showShowdownDialog(results);
-        setDealerIndex((prev) => {
-          let next = (prev + 1) % numPlayers;
-          // Skip players with 0 money
-          while (players[next][0]().money === 0) {
-            next = (next + 1) % numPlayers;
-            if (next === prev) break; // All players broke? shouldn't happen
+          setCards(getCleanShuffledDeck());
+          players.forEach(([, setPlayer]) =>
+            setPlayer((player) => ({
+              ...player,
+              bet: 0,
+              allIn: false,
+              folded: player.money === 0,
+              hasActed: false,
+              betHistory: [...player.betHistory, []],
+            })),
+          );
+          await dealCards(getCards(), players);
+          setGameStage(getNextGameStage);
+          break;
+        }
+
+        case 'bet1':
+        case 'bet2':
+        case 'bet3':
+        case 'bet4': {
+          setActivePlayerIndex(findNextActor((getDealerIndex() + 1) % numPlayers));
+          if (!shouldSkipBetting()) {
+            await betStage(
+              getCards().map(([getCard]) => getCard()),
+              players,
+              activePlayerIndexSignal,
+              stage === 'bet1',
+            );
           }
-          return next;
-        });
-        setGameStage('deal');
-      } else if (stage === 'result') {
-        const winnerAccessor = players.find(([p]) => p().money > 0);
-        if (winnerAccessor) {
-          await showResultDialog(winnerAccessor[0]());
+          if (checkEarlyEnd()) return;
+          setGameStage(getNextGameStage);
+          break;
+        }
+
+        case 'flop':
+        case 'turn':
+        case 'river': {
+          await dealCommunity(getCards(), stage);
+          players.forEach(([, setPlayer]) =>
+            setPlayer((player) => ({
+              ...player,
+              hasActed: false,
+            })),
+          );
+          setGameStage(getNextGameStage);
+          break;
+        }
+
+        case 'showdown': {
+          const results = showdown(
+            getCards().map(([c]) => c()),
+            players.map(([p]) => p()),
+          );
+
+          // Winner logic: Give pot to winners
+          const pot = players.map(([p]) => p().bet).sum();
+          const winners = results.filter((r) => r.handValue.score === results[0].handValue.score);
+          const splitPot = Math.floor(pot / winners.length);
+
+          winners.forEach((w) => {
+            // Find the player index to update their money
+            const pIdx = players.findIndex(([p]) => p().name === w.player.name);
+            if (pIdx !== -1) {
+              const [, setPlayer] = players[pIdx];
+              setPlayer((p) => ({ ...p, money: p.money + splitPot }));
+            }
+          });
+
+          await showShowdownDialog(results);
+          setDealerIndex((prev) => {
+            let next = (prev + 1) % numPlayers;
+            // Skip players with 0 money
+            while (players[next][0]().money === 0) {
+              next = (next + 1) % numPlayers;
+              if (next === prev) break; // All players broke? shouldn't happen
+            }
+            return next;
+          });
+          setGameStage('deal');
+          break;
+        }
+
+        case 'result': {
+          const winnerAccessor = players.find(([p]) => p().money > 0);
+          if (winnerAccessor) {
+            await showResultDialog(winnerAccessor[0]());
+          }
+          break;
         }
       }
     });
