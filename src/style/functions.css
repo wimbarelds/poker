@@ -1,0 +1,34 @@
+@function --player-pos(--angle <angle>, --translate-dist <length>) {
+  result: translateX(calc(cos(var(--angle)) * 1.12 * var(--translate-dist)))
+    translateY(calc(sin(var(--angle)) * var(--translate-dist)));
+}
+
+@function --player-angle(--location-index <number>, --num-players <number>) {
+  result: calc(
+    90deg + mod(180deg + var(--location-index) / var(--num-players) * 360deg, 360deg) - 180deg
+  );
+}
+
+/* Functions to determine if player-info goes above/below the cards */
+/* 180 - 270 and -90 - 0*/
+@function --over-multi(--angle <angle>) {
+  result: if(
+    style(--angle > 180deg): calc((270deg - var(--angle)) / 90deg) ;
+      else: calc((var(--angle) + 90deg) / 90deg) ;
+  );
+}
+
+/* 90 - 180 and 0 - 90*/
+@function --under-multi(--angle <angle>) {
+  result: if(
+    style(--angle >= 90deg): calc((var(--angle) - 90deg) / 90deg) ;
+      else: calc((90deg - var(--angle)) / 90deg) ;
+  );
+}
+
+@function --over-under-multi(--angle <angle>) {
+  result: if(
+    style((--angle > 180deg) or (--angle < 0deg)): calc(0.3 - --over-multi(var(--angle)) / 1.5) ;
+      else: calc(1.8 + --under-multi(var(--angle)) / 1.3) ;
+  );
+}

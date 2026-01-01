@@ -1,0 +1,28 @@
+@import 'tailwindcss';
+
+@layer components {
+  :root {
+    --size: 8vmin;
+    --cardSize: var(--size, 40vmin);
+    --cardWidth: var(--size) * 64 / 98;
+  }
+
+  button {
+    @apply cursor-pointer;
+  }
+
+  input[type='number']::-webkit-outer-spin-button,
+  input[type='number']::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    appearance: textfield;
+  }
+
+  @import './style/functions.css';
+  @import './style/table.css';
+  @import './style/player.css';
+  @import './style/card.css';
+  @import './style/dialog.css';
+}

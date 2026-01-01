@@ -1,0 +1,5 @@
+- Fix chips z-index
+- If after betting round everyone folded/all-in, showdown
+- improve showdown UI
+- raise should be disabled if money <= costToCall
+- refactor App.tsx for readability

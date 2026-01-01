@@ -1,0 +1,317 @@
+.card {
+  transform-style: preserve-3d;
+
+  .back-side,
+  .front-side {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: #fbfbfb;
+    backface-visibility: hidden;
+
+    display: grid;
+    grid-template:
+      'a . .' auto
+      '. . .' 1fr
+      '. . b' auto / 35% 1fr 35%;
+  }
+
+  .front-side {
+    transform: rotateY(180deg);
+  }
+}
+
+.card {
+  outline: solid 5px --bg-color();
+  aspect-ratio: 64/98;
+  height: var(--cardSize);
+  border-radius: calc(var(--cardSize) / 25);
+  padding: calc(var(--cardSize) / 20);
+  font-family: 'Times New Roman';
+
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: calc(var(--cardWidth) * -0.5);
+  margin-top: calc(var(--cardSize) * -0.5);
+
+  --transition-duration: 600ms;
+  transition-property: transform, translate, rotate, scale;
+  transition-duration: var(--transition-duration);
+  transition-timing-function: ease-out;
+
+  --rotateY: 0deg;
+
+  &.face {
+    --rotateY: 180deg;
+  }
+
+  --location-index: attr(data-location-index type(<number>));
+  --location-subindex: attr(data-location-subindex type(<number>));
+
+  &[data-location='deck'] {
+    transform: translateY(calc(var(--size) * -0.75))
+      translateY(calc(var(--size) * var(--location-index) * -0.0025)) rotate(35deg)
+      rotateY(var(--rotateY));
+
+    &:nth-of-type(8n) {
+      outline: solid 0.1px var(--color-neutral-500);
+    }
+  }
+
+  &[data-location='player'] {
+    --translate-dist: calc(var(--size) * 4);
+    --angle: --player-angle(var(--location-index), var(--num-players));
+    --offset: calc(var(--location-subindex) - 0.5);
+
+    transform-origin: center;
+    transform: --player-pos(var(--angle), var(--translate-dist))
+      rotate(calc(var(--angle) + var(--offset) * -5deg - 90deg))
+      translateX(calc(var(--size) * var(--offset) * 1.1 * 0.75)) rotateY(var(--rotateY));
+  }
+
+  &[data-location='flop'] {
+    transform: translateY(calc(var(--cardSize) * 0.75)) translateX(calc(var(--cardWidth) * -2.58))
+      translateX(calc(var(--cardWidth) * var(--location-index) * 1.2)) rotateY(var(--rotateY));
+  }
+  &[data-location='turn'] {
+    transform: translateY(calc(var(--cardSize) * 0.75)) translateX(calc(var(--cardWidth) * 1.2))
+      rotateY(var(--rotateY));
+  }
+  &[data-location='river'] {
+    transform: translateY(calc(var(--cardSize) * 0.75)) translateX(calc(var(--cardWidth) * 2.58))
+      rotateY(var(--rotateY));
+  }
+}
+
+.suit {
+  aspect-ratio: 1/1;
+}
+
+.card.face .front-side {
+  &::before {
+    content: attr(data-value);
+    position: absolute;
+    width: fit-content;
+    height: fit-content;
+    inset: 0;
+    margin: auto;
+    font-size: calc(var(--cardSize) * 0.6);
+  }
+
+  &[data-suit='spades'],
+  &[data-suit='clubs'] {
+    color: black;
+  }
+
+  &[data-suit='hearts'],
+  &[data-suit='diamonds'] {
+    color: red;
+  }
+
+  .suit {
+    position: relative;
+  }
+
+  .suit ~ .suit {
+    grid-area: b;
+    rotate: 180deg;
+  }
+
+  /* Stem */
+  .suit p::after {
+    content: '';
+    position: absolute;
+    width: 20%;
+    height: 25%;
+    bottom: 6%;
+    background: currentColor;
+    left: 40%;
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%, 50% 0%);
+  }
+
+  &[data-suit='hearts'] {
+    .suit::before,
+    .suit::after {
+      content: '';
+      display: block;
+      position: absolute;
+      background: currentColor;
+      width: 50%;
+      bottom: 10%;
+      height: 75%;
+      border-radius: 100vmax 100vmax 0 0;
+    }
+
+    .suit::before {
+      left: 50%;
+      transform-origin: 0% 100%;
+      rotate: -45deg;
+    }
+    .suit::after {
+      right: 50%;
+      transform-origin: 100% 100%;
+      rotate: 45deg;
+    }
+    .suit p {
+      display: none;
+    }
+  }
+
+  /*
+  DIAMONDS
+  */
+  &[data-suit='diamonds'] {
+    .suit::before {
+      content: '';
+      display: block;
+      position: absolute;
+      inset: 0;
+      margin: auto;
+      width: 50%;
+      aspect-ratio: 1;
+      background: currentColor;
+      transform: scaleY(1.33) rotate(45deg);
+    }
+    .suit p {
+      display: none;
+    }
+  }
+
+  /*
+  SPADES
+  */
+  &[data-suit='spades'] {
+    .suit::before,
+    .suit::after {
+      content: '';
+      display: block;
+      position: absolute;
+      background: currentColor;
+      width: 49%;
+      top: 5%;
+      height: 75%;
+      border-radius: 0 0 100vmax 100vmax;
+    }
+
+    .suit::before {
+      left: 50%;
+      transform-origin: 0% 0%;
+      rotate: 45deg;
+    }
+
+    .suit::after {
+      right: 50%;
+      transform-origin: 100% 0%;
+      rotate: -45deg;
+    }
+  }
+
+  /*
+  CLUBS
+  */
+  &[data-suit='clubs'] {
+    .suit::before,
+    .suit::after,
+    .suit p::before {
+      content: '';
+      display: block;
+      position: absolute;
+      background: currentColor;
+      width: 48%;
+      height: 48%;
+      border-radius: 100vmax;
+    }
+    .suit::before {
+      left: 5%;
+      bottom: 15%;
+    }
+    .suit::after {
+      right: 5%;
+      bottom: 15%;
+    }
+
+    .suit p::before {
+      left: 25%;
+      top: 5%;
+    }
+  }
+}
+
+.card .back-side {
+  overflow: hidden;
+  border: solid #fbfbfb calc(var(--cardSize) * 0.025);
+  background: radial-gradient(hsl(210, 20%, 46%), #fbfbfb);
+
+  .suit::before,
+  .suit::after,
+  .suit p::before,
+  .suit p::after {
+    content: '';
+    position: absolute;
+    display: block;
+    width: 20%;
+    aspect-ratio: 1;
+    background: #fbfbfb;
+    rotate: 45deg;
+    translate: -50% -50%;
+    box-shadow: inset calc(var(--cardSize) * -0.025) calc(var(--cardSize) * -0.025)
+      calc(var(--cardSize) * 0.1) #a00;
+    filter: drop-shadow(0 0 calc(var(--cardSize) * 0.005) #fbfbfb);
+    opacity: 0.75;
+  }
+
+  .suit:nth-child(1)::before {
+    left: 30%;
+    top: 50%;
+    box-shadow: inset calc(var(--cardSize) * -0.025) calc(var(--cardSize) * 0.025)
+      calc(var(--cardSize) * 0.1) #246;
+  }
+  .suit:nth-child(1)::after {
+    left: 70%;
+    top: 50%;
+    box-shadow: inset calc(var(--cardSize) * 0.025) calc(var(--cardSize) * -0.025)
+      calc(var(--cardSize) * 0.1) #246;
+  }
+
+  .suit:nth-child(1) p::before {
+    left: 50%;
+    top: 50%;
+    margin-top: -20%;
+  }
+  .suit:nth-child(1) p::after {
+    left: 50%;
+    top: 50%;
+    margin-top: 20%;
+  }
+
+  .suit:nth-child(2)::before {
+    left: 30%;
+    top: 50%;
+    margin-top: -40%;
+  }
+  .suit:nth-child(2)::after {
+    left: 70%;
+    top: 50%;
+    margin-top: -40%;
+  }
+
+  .suit:nth-child(2) p::before {
+    left: 30%;
+    top: 50%;
+    margin-top: 40%;
+  }
+  .suit:nth-child(2) p::after {
+    left: 70%;
+    top: 50%;
+    margin-top: 40%;
+  }
+  .suit:nth-child(1) p::after,
+  .suit:nth-child(2) p::before,
+  .suit:nth-child(2) p::after {
+    box-shadow: inset calc(var(--cardSize) * 0.025) calc(var(--cardSize) * 0.025)
+      calc(var(--cardSize) * 0.1) #333;
+  }
+}

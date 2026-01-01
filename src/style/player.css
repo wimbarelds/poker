@@ -1,0 +1,191 @@
+/* 90, 162, 234, -54, 18, max = 270, min = 90 */
+.player {
+  @property --angle {
+    syntax: '<angle>';
+    inherits: true;
+    initial-value: 0deg;
+  }
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  pointer-events: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  translate: -50% 0;
+  transform-origin: top;
+  --translate-dist: calc(var(--size) * 4);
+  --angle: --player-angle(var(--player-index), var(--num-players));
+  transform: --player-pos(var(--angle), var(--translate-dist)) translateY(-50%);
+  gap: 1.5vmin;
+}
+
+.player-info {
+  position: absolute;
+  white-space: nowrap;
+  --translate-dist: calc(var(--size) * 0.5);
+  --angle: --player-angle(var(--player-index), var(--num-players));
+  --y-multiplier: --over-under-multi(var(--angle));
+  transform: --player-pos(var(--angle), var(--translate-dist)) translateY(-50%)
+    translateY(calc(var(--y-multiplier) * var(--size)));
+}
+
+.player-last-action {
+  position: absolute;
+  translate: -50% -50%;
+  text-box: trim-both cap alphabetic;
+  transition: opacity 0.3s ease-in-out;
+  @apply bg-linear-to-b px-4 py-2 rounded-lg;
+
+  &[data-action='blind'] {
+    @apply from-blue-500 to-blue-700 border-blue-400;
+  }
+
+  &[data-action='fold'] {
+    @apply from-red-500 to-red-700 border-red-400;
+  }
+
+  &[data-action='bet'],
+  &[data-action='raise'],
+  &[data-action='all-in'] {
+    @apply from-amber-400 to-amber-600 border-amber-300 text-amber-950;
+  }
+
+  &[data-action='check'],
+  &[data-action='call'] {
+    @apply from-emerald-500 to-emerald-700 border-emerald-400;
+  }
+}
+
+.player-active .player-last-action {
+  opacity: 0;
+}
+
+.player-bet-chips {
+  @apply flex gap-1;
+  --chipSize: calc(var(--size) * 0.6);
+  position: absolute;
+  --translate-dist: calc(var(--size) * -1.25);
+  --angle: --player-angle(var(--player-index), var(--num-players));
+  transform: --player-pos(var(--angle), var(--translate-dist)) rotate(calc(var(--angle) - 90deg));
+  z-index: 1;
+}
+
+.player-bet-chips-stack {
+  @apply flex flex-col-reverse;
+  transform: rotate(calc((var(--angle) - 90deg) * -1));
+  width: calc(var(--chipSize) * 1);
+  transition: width 0.3s ease-in-out;
+}
+
+.player-bet-chips-stack:empty {
+  width: 0;
+}
+
+.chip {
+  @apply relative;
+  --batch-index: attr(data-batch-index type(<integer>));
+  width: calc(var(--chipSize) * 1);
+  height: calc(var(--chipSize) * 1);
+  background: var(--chip-face);
+  border-radius: 100%;
+  transform-style: preserve-3d;
+  transform: rotateX(50deg);
+  margin-bottom: calc(var(--chipSize) * -0.87);
+  transition: 0.3s ease-out;
+  transition-property: opacity, transform;
+  transition-delay: calc(var(--batch-index) * 0.3s);
+
+  @starting-style {
+    opacity: 0;
+    transform: --player-pos(var(--angle), calc(var(--size) * 2));
+  }
+
+  &::before {
+    --coneWidth: 10deg;
+
+    content: '';
+    display: block;
+    position: absolute;
+    inset: 0;
+    border-radius: 100%;
+    background: conic-gradient(
+      transparent,
+      transparent calc(45deg - var(--coneWidth)),
+      white calc(45deg - var(--coneWidth)),
+      white calc(45deg + var(--coneWidth)),
+      transparent calc(45deg + var(--coneWidth)),
+      transparent calc(135deg - var(--coneWidth)),
+      white calc(135deg - var(--coneWidth)),
+      white calc(135deg + var(--coneWidth)),
+      transparent calc(135deg + var(--coneWidth)),
+      transparent calc(225deg - var(--coneWidth)),
+      white calc(225deg - var(--coneWidth)),
+      white calc(225deg + var(--coneWidth)),
+      transparent calc(225deg + var(--coneWidth)),
+      transparent calc(315deg - var(--coneWidth)),
+      white calc(315deg - var(--coneWidth)),
+      white calc(315deg + var(--coneWidth)),
+      transparent calc(315deg + var(--coneWidth))
+    );
+  }
+
+  &::after {
+    --shadow-base: calc(var(--chipSize) * 0.03);
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    z-index: -1;
+    box-shadow:
+      0px var(--shadow-base) 0px var(--chip-edge),
+      0px calc(var(--shadow-base) * 2) 0px var(--chip-edge),
+      0px calc(var(--shadow-base) * 3) 0px var(--chip-edge),
+      0px calc(var(--shadow-base) * 4) 0px var(--chip-edge),
+      0px calc(var(--shadow-base) * 5) 0px var(--chip-edge),
+      0px calc(var(--shadow-base) * 6) 0px var(--chip-edge),
+      0px calc(var(--shadow-base) * 14) calc(var(--shadow-base) * 10) rgba(0, 0, 0, 0.4);
+  }
+
+  /* margin-bottom: calc(var(--chipSize) * -0.25); */
+}
+
+.chip-value {
+  @apply absolute text-xs font-bold flex items-center justify-center;
+  left: 50%;
+  top: 50%;
+  text-box: trim-both cap alphabetic;
+  width: calc(var(--chipSize) * 0.75);
+  height: calc(var(--chipSize) * 0.7);
+  border: dashed #fff 2px;
+  border-radius: 100%;
+  transform: translate(-50%, -50%);
+  background: inherit;
+}
+
+.chip-white {
+  --chip-face: var(--color-zinc-100);
+  --chip-edge: var(--color-zinc-400);
+}
+
+.chip-red {
+  --chip-face: var(--color-red-500);
+  --chip-edge: var(--color-red-800);
+}
+
+.chip-green {
+  --chip-face: var(--color-green-600);
+  --chip-edge: var(--color-green-800);
+}
+
+.chip-black {
+  --chip-face: var(--color-zinc-500);
+  --chip-edge: var(--color-zinc-800);
+}
+
+.chip-blue {
+  --chip-face: var(--color-blue-500);
+  --chip-edge: var(--color-blue-800);
+}

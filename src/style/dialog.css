@@ -1,0 +1,48 @@
+dialog {
+  background: transparent;
+
+  animation: slideIn 0.4s;
+}
+
+dialog::backdrop {
+  transition: backdrop-filter 0.5s ease-out;
+  backdrop-filter: saturate(0.9);
+  @starting-style {
+    backdrop-filter: saturate(1) brightness(1);
+  }
+}
+
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateY(20vh);
+  }
+  25% {
+    opacity: 0;
+    transform: translateY(20vh);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0vh);
+  }
+}
+
+.showdown-card-wrapper {
+  position: relative;
+  width: 2rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: -0.5rem;
+}
+
+.showdown-card-wrapper .card {
+  position: relative !important;
+  top: 0 !important;
+  left: 0 !important;
+  margin: 0 !important;
+  transform: scale(0.45) rotateY(var(--rotateY)) !important;
+  transition: none !important;
+  pointer-events: none;
+}

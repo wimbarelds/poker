@@ -1,0 +1,10 @@
+{
+  "plugins": ["eslint", "unicorn", "oxc", "typescript", "vitest", "jsx-a11y"],
+  "rules": {
+    "no-new-array": "off",
+    "typescript/consistent-type-imports": [
+      "error",
+      { "fixStyle": "separate-type-imports", "prefer": "type-imports" }
+    ]
+  }
+}
