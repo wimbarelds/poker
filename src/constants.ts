@@ -55,24 +55,24 @@ export const playerNames = [
 export const playerArchetypes = [
   // 1. THE STATION (The ATM)
   // Decent math, but refuses to fold.
-  { id: 'station', risk: 0.5, bluff: 0.05, iterations: 1000, weight: 30 },
+  { id: 'station', risk: 0.5, bluff: 0.05, iterations: 100, weight: 30 },
 
   // 2. THE GAMBLER (The Maniac)
   // Fast, loose, approximate math.
-  { id: 'gambler', risk: 0.3, bluff: 0.4, iterations: 500, weight: 25 },
+  { id: 'gambler', risk: 0.3, bluff: 0.4, iterations: 25, weight: 25 },
 
   // 3. THE ROCK (The Nit)
   // Precision math. If they put chips in, they calculated it perfectly.
-  { id: 'rock', risk: 0.0, bluff: 0.0, iterations: 3000, weight: 15 },
+  { id: 'rock', risk: 0.0, bluff: 0.0, iterations: 300, weight: 15 },
 
   // 4. THE SHARK (The Boss)
   // Max intelligence, aggressive but calculated.
-  { id: 'shark', risk: 0.1, bluff: 0.15, iterations: 5000, weight: 20 },
+  { id: 'shark', risk: 0.1, bluff: 0.15, iterations: 500, weight: 20 },
 
   // 5. THE NOOB (The Wildcard)
   // Very low iterations = High variance in their perceived win chance.
   // They effectively "misread" the board often.
-  { id: 'noob', risk: 0.2, bluff: 0.1, iterations: 250, weight: 10 },
+  { id: 'noob', risk: 0.2, bluff: 0.1, iterations: 5, weight: 10 },
 ] as const;
 
 export const chipBases = [
