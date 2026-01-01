@@ -71,6 +71,7 @@
   --angle: --player-angle(var(--player-index), var(--num-players));
   transform: --player-pos(var(--angle), var(--translate-dist)) rotate(calc(var(--angle) - 90deg));
   z-index: 1;
+  isolation: isolate;
 }
 
 .player-bet-chips-stack {
@@ -78,6 +79,7 @@
   transform: rotate(calc((var(--angle) - 90deg) * -1));
   width: calc(var(--chipSize) * 1);
   transition: width 0.3s ease-in-out;
+  z-index: --depth-index(var(--angle), sibling-index(), sibling-count());
 }
 
 .player-bet-chips-stack:empty {

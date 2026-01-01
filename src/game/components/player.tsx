@@ -86,7 +86,7 @@ function getChipStacksForBetsInRound(bets: BetInfo[]) {
 function amountToChips(amount: number): ChipValue[] {
   return chipValuesDesc.reduce((chipsArray: ChipValue[], chipValue) => {
     const valueLeft = amount - chipsArray.sum();
-    const chipsOfValue = Math.floor(valueLeft / chipValue);
+    const chipsOfValue = Math.max(0, Math.floor(valueLeft / chipValue));
     return [...chipsArray, ...createArr(chipsOfValue, () => chipValue)];
   }, []);
 }

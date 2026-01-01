@@ -1,5 +1,8 @@
-- Fix chips z-index
-- If after betting round everyone folded/all-in, showdown
 - improve showdown UI
 - raise should be disabled if money <= costToCall
 - refactor App.tsx for readability
+- players with the most money should not go all in (at most they should bet as much as the next richest player has)
+- should be a betting round after river
+- figure out better iteration values, write helper that determines how many iterations lead to how much accuracy
+- debug ui
+- side-pot
