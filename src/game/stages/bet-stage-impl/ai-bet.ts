@@ -181,8 +181,9 @@ export function calculateAIAction(
   const rateOfReturn = winChance / potOdds;
 
   const isBluffing = timesRaised > 0 && rateOfReturn < 1.0;
-  if (isBluffing && (rateOfReturn >= 0.5 || Math.random() < bluff))
+  if (isBluffing && (rateOfReturn >= 0.5 || Math.random() < bluff)) {
     return ['call', costToCall, 'continue-bluff'];
+  }
 
   // Re-raise threshold: Halved effect (1.8 pre / 2.0 post)
   const reRaiseThreshold = (isPreFlop ? 1.8 : 2.0) * raiseFatigue * riskAdjustment;

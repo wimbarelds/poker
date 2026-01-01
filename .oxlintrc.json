@@ -2,6 +2,7 @@
   "plugins": ["eslint", "unicorn", "oxc", "typescript", "vitest", "jsx-a11y"],
   "rules": {
     "no-new-array": "off",
+    "curly": ["error", "multi-line"],
     "typescript/consistent-type-imports": [
       "error",
       { "fixStyle": "separate-type-imports", "prefer": "type-imports" }

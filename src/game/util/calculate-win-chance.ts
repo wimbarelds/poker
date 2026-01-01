@@ -43,8 +43,9 @@ function randomOutcome({
   otherPlayerMultipliers,
 }: RandomResultOptions): boolean {
   const deckCopy = deck.slice();
-  if (community.length < 5)
+  if (community.length < 5) {
     community = [...community, ...deckCopy.takeRandom(5 - community.length)];
+  }
   const others = createArr(otherPlayerMultipliers.length, () => deckCopy.takeRandom(2));
   const { score } = getHandValue(hand, community);
   return others.every(

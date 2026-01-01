@@ -21,8 +21,9 @@ function randomOutcome({
   const deckCopy = deck.slice();
   let tempCommunity = [...community];
 
-  if (tempCommunity.length < 5)
+  if (tempCommunity.length < 5) {
     tempCommunity = [...tempCommunity, ...deckCopy.takeRandom(5 - tempCommunity.length)];
+  }
 
   const others = createArr(otherPlayerMultipliers.length, () => deckCopy.takeRandom(2));
   const { score } = getHandValue(hand, tempCommunity);
