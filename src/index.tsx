@@ -6,8 +6,6 @@ import './global/array-helpers';
 import App from './App';
 import { BrowserWarning } from './browser-warning';
 
-
-
 document.querySelector('#browser-warning')?.remove();
 
 const root = document.getElementById('root');
@@ -18,7 +16,7 @@ if (import.meta.env.DEV && !(root instanceof HTMLElement)) {
   );
 }
 
-render(() => checkBrowserSupport() ? <App /> : <BrowserWarning />, root!);
+render(() => (checkBrowserSupport() ? <App /> : <BrowserWarning />), root!);
 
 function checkBrowserSupport() {
   if (!CSS.supports('z-index', 'sibling-index()')) return false;
