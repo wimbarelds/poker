@@ -8,7 +8,7 @@ import { defineConfig as defineVitestConfig } from 'vitest/config';
 import { vitePluginGhPagesBase } from './src/vite/vite-plugin-ghpages-base';
 
 const viteConfig = defineConfig({
-  plugins: [devtools(), solidPlugin(), tailwindcss(), vitePluginGhPagesBase()],
+  plugins: [devtools(), solidPlugin(), tailwindcss({ optimize: false }), vitePluginGhPagesBase()],
   resolve: {
     alias: {
       '@': resolve(import.meta.dirname, 'src'),
@@ -19,6 +19,21 @@ const viteConfig = defineConfig({
   },
   build: {
     target: 'esnext',
+  },
+  css: {
+    lightningcss: {
+      targets: { chrome: 140 },
+      customAtRules: {
+        function: {
+          prelude: '*',
+          body: 'style-block',
+        },
+        property: {
+          prelude: '<custom-ident>',
+          body: 'declaration-list',
+        },
+      },
+    },
   },
 });
 
