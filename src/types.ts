@@ -50,7 +50,8 @@ export type Stage = (typeof gameStages)[number];
 
 export type BetAction = (typeof betActions)[number];
 
-export type BetInfo = [BetAction, number, string?];
+export type BetReason = { reason: string; [key: string]: unknown };
+export type BetInfo = [BetAction, number, BetReason?];
 
 export interface Table {
   players: Player[];

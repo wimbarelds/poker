@@ -3,7 +3,7 @@ import type { InspectColor } from 'node:util';
 
 import { styleText } from 'node:util';
 
-import type { Player, Card } from '@/types';
+import type { Player, Card, BetReason } from '@/types';
 
 import { blind, smallBlind } from '@/constants';
 import { calculateAIAction } from '@/game/stages/bet-stage-impl/ai-bet';
@@ -50,7 +50,7 @@ export interface SimResult {
 export function runGenericTableSimulation(
   players: Player[],
   allCards: Card[],
-  onAction?: (reason: string) => void,
+  onAction?: (reason: BetReason) => void,
 ): SimResult {
   // 4. Post Blinds
   const sbPlayer = players[0];
@@ -100,15 +100,12 @@ export function runGenericTableSimulation(
         const actionInfo = calculateAIAction(hand, community, players, activePlayerIndex, true);
         const [action, amount, reason] = actionInfo;
 
-        if (reason && onAction) {
-          onAction(reason);
-        }
+        if (reason && onAction) onAction(reason);
 
         player.hasActed = true;
 
-        if (action === 'fold') {
-          player.folded = true;
-        } else if (['bet', 'call', 'raise', 'all-in'].includes(action)) {
+        if (action === 'fold') player.folded = true;
+        else if (['bet', 'call', 'raise', 'all-in'].includes(action)) {
           player.bet += amount;
           player.money -= amount;
           if (player.money <= 0) player.allIn = true;

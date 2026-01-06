@@ -8,5 +8,9 @@
 - [ ] 8. Improve showdown UI
 - [x] 9. Add gh-pages link to readme
 - [ ] 10. If all but 1 player folds, you should not see the showdown
+- [ ] 11. Speed multiplier
+- [ ] 12. Raise fatigue seems defective
+- [ ] 13. Partial Debug
+- [ ] 14. Disable the fold button when player can check
 
 Idea: Dont just use opponents previous rounds bets to adjust their predicted hand quality, compare it against their current bet. If they dont typically bet a lot, but do bet high now...

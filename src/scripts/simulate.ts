@@ -28,7 +28,7 @@ function runTableSimulation(tableId: number) {
   const allCards = createShuffledDeck();
   synchronousDealCards(allCards);
 
-  const result = runGenericTableSimulation(players, allCards, (reason) => {
+  const result = runGenericTableSimulation(players, allCards, ({ reason }) => {
     stats[reason] = (stats[reason] || 0) + 1;
   });
 

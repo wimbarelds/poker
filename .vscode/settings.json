@@ -1,4 +1,9 @@
 {
   "editor.formatOnSave": true,
-  "css.lint.unknownAtRules": "ignore"
+  "css.lint.unknownAtRules": "ignore",
+  "oxc.fmt.configPath": "./.oxfmtrc.jsonc",
+  "oxc.configPath": "./.oxlintrc.json",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.oxc": "always"
+  }
 }
