@@ -91,7 +91,7 @@ export function calculateAIAction(
 
   // 2. Check or bet branch (Opening)
   if (costToCall === 0) {
-    return checkOrBet({ bluffThreshold, costToCall, desperation, isPreFlop, maxStake, player, potSize, raiseFatigue: harshRaiseFatigue, winChance, riskAdjustment });
+    return checkOrBet({ bluffThreshold, costToCall, desperation, isPreFlop, maxStake, player, potSize, raiseFatigue: looseRaiseFatigue, winChance, riskAdjustment });
   }
 
   // Check for continued bluff
