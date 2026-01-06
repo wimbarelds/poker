@@ -5,10 +5,10 @@ import type { BetInfo, Card, Player } from '@/types';
 import { blind, startingMoney } from '@/constants';
 import { calculateMaxStake } from '@/game/util/calculate-max-raise';
 import { selectCommunityCards, selectPlayerCards } from '@/game/util/select-cards';
+import { isDebug } from '@/util/debug';
 
 import { calculateWinChance } from '../../util/calculate-win-chance';
 import { addBetToBetHistory } from './add-bet-to-history';
-import { isDebug } from '@/util/debug';
 
 export function betStageAI(
   cards: Card[],
@@ -85,13 +85,34 @@ export function calculateAIAction(
 
   // 1. Random Bluff Check
   if (!timesRaisedSelf) {
-    const randomBluffResult = randomBluff({ bluffThreshold, costToCall, desperation, isPreFlop, maxStake, player, potSize, raiseFatigue: harshRaiseFatigue, winChance });
+    const randomBluffResult = randomBluff({
+      bluffThreshold,
+      costToCall,
+      desperation,
+      isPreFlop,
+      maxStake,
+      player,
+      potSize,
+      raiseFatigue: harshRaiseFatigue,
+      winChance,
+    });
     if (randomBluffResult) return randomBluffResult;
   }
 
   // 2. Check or bet branch (Opening)
   if (costToCall === 0) {
-    return checkOrBet({ bluffThreshold, costToCall, desperation, isPreFlop, maxStake, player, potSize, raiseFatigue: looseRaiseFatigue, winChance, riskAdjustment });
+    return checkOrBet({
+      bluffThreshold,
+      costToCall,
+      desperation,
+      isPreFlop,
+      maxStake,
+      player,
+      potSize,
+      raiseFatigue: looseRaiseFatigue,
+      winChance,
+      riskAdjustment,
+    });
   }
 
   // Check for continued bluff
@@ -104,7 +125,20 @@ export function calculateAIAction(
     if (continueBluffResult) return continueBluffResult;
   }
 
-  const raiseGoodCardsResult = raiseGoodCards({ bluffThreshold, costToCall, desperation, isPreFlop, maxStake, player, potOdds, potSize, raiseFatigue: harshRaiseFatigue, rateOfReturn, riskAdjustment, winChance });
+  const raiseGoodCardsResult = raiseGoodCards({
+    bluffThreshold,
+    costToCall,
+    desperation,
+    isPreFlop,
+    maxStake,
+    player,
+    potOdds,
+    potSize,
+    raiseFatigue: harshRaiseFatigue,
+    rateOfReturn,
+    riskAdjustment,
+    winChance,
+  });
   if (raiseGoodCardsResult) return raiseGoodCardsResult;
 
   // Check if cards good enough to call
@@ -114,7 +148,7 @@ export function calculateAIAction(
       rateOfReturn,
       winChance,
       potOdds,
-      callThreshold
+      callThreshold,
     };
     return ['call', costToCall, reason];
   }
@@ -122,7 +156,12 @@ export function calculateAIAction(
   // Check if desperate enough to call
   const risk = addDesperationToRisk(player.archtype.risk, desperation);
   if (Math.random() < risk * (1 - commitmentFactor)) {
-    const reason = { reason: 'desperation-call', risk, baseRisk: player.archtype.risk, desperation };
+    const reason = {
+      reason: 'desperation-call',
+      risk,
+      baseRisk: player.archtype.risk,
+      desperation,
+    };
     return ['call', costToCall, reason];
   }
 
@@ -142,7 +181,17 @@ interface RandomBluffOptions {
   isPreFlop: boolean;
 }
 
-function randomBluff({ player, costToCall, bluffThreshold, desperation, winChance, maxStake, potSize, raiseFatigue, isPreFlop }: RandomBluffOptions): BetInfo | null {
+function randomBluff({
+  player,
+  costToCall,
+  bluffThreshold,
+  desperation,
+  winChance,
+  maxStake,
+  potSize,
+  raiseFatigue,
+  isPreFlop,
+}: RandomBluffOptions): BetInfo | null {
   const r = Math.random();
   if (r > bluffThreshold) return null;
 
@@ -182,7 +231,18 @@ interface CheckOrBetOptions {
   riskAdjustment: number;
 }
 
-function checkOrBet({ player, costToCall, bluffThreshold, desperation, winChance, maxStake, potSize, raiseFatigue, isPreFlop, riskAdjustment }: CheckOrBetOptions): BetInfo {
+function checkOrBet({
+  player,
+  costToCall,
+  bluffThreshold,
+  desperation,
+  winChance,
+  maxStake,
+  potSize,
+  raiseFatigue,
+  isPreFlop,
+  riskAdjustment,
+}: CheckOrBetOptions): BetInfo {
   // Pre-calculate how much we would raise, if we're going to raise
   const { amount, reason: amountReason } = getRaiseAmount(
     player,
@@ -231,7 +291,11 @@ interface ContinueBluffOptions {
   costToCall: number;
 }
 
-function continueBluff({ rateOfReturn, bluffThreshold, costToCall }: ContinueBluffOptions): BetInfo | null {
+function continueBluff({
+  rateOfReturn,
+  bluffThreshold,
+  costToCall,
+}: ContinueBluffOptions): BetInfo | null {
   if (rateOfReturn < 0.5 && Math.random() > bluffThreshold) return null;
 
   const reason = { reason: 'continue-bluff', bluffThreshold };
@@ -253,7 +317,20 @@ interface RaiseGoodCardsOptions {
   potOdds: number;
 }
 
-function raiseGoodCards({ player, rateOfReturn, costToCall, bluffThreshold, desperation, winChance, maxStake, potSize, raiseFatigue, isPreFlop, riskAdjustment, potOdds }: RaiseGoodCardsOptions): BetInfo | null {
+function raiseGoodCards({
+  player,
+  rateOfReturn,
+  costToCall,
+  bluffThreshold,
+  desperation,
+  winChance,
+  maxStake,
+  potSize,
+  raiseFatigue,
+  isPreFlop,
+  riskAdjustment,
+  potOdds,
+}: RaiseGoodCardsOptions): BetInfo | null {
   // Raise threshold: Halved effect (1.8 pre / 2.0 post)
   const raiseThreshold = (isPreFlop ? 1.8 : 2.0) * raiseFatigue * riskAdjustment;
   if (rateOfReturn < raiseThreshold) return null;
@@ -281,7 +358,7 @@ function raiseGoodCards({ player, rateOfReturn, costToCall, bluffThreshold, desp
   };
 
   const betAction = amount === player.money ? 'all-in' : 'raise';
-  return [betAction, amount, reason]
+  return [betAction, amount, reason];
 }
 
 function getRaiseAmount(
@@ -306,7 +383,6 @@ function getRaiseAmount(
   if (isBluffing && Math.random() < Math.pow(Math.max(bluff, winChance), 5)) {
     return { amount: maxBet, reason: 'bluff-all-in' };
   }
-
 
   // If our target bet is higher than 90% of our money, go all in
   const allInThreshold = player.money * 0.9;
