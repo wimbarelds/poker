@@ -7,8 +7,14 @@ import { defineConfig as defineVitestConfig } from 'vitest/config';
 
 import { vitePluginGhPagesBase } from './src/vite/vite-plugin-ghpages-base';
 
+const baseWarn = console.warn.bind(console);
+console.warn = (arg1, ...args) => {
+  if (typeof arg1 === 'string' && arg1.match(/^Found \d+ warnings while optimizing generated CSS/)) return;
+  return baseWarn(arg1, ...args);
+};
+
 const viteConfig = defineConfig({
-  plugins: [devtools(), solidPlugin(), tailwindcss({ optimize: false }), vitePluginGhPagesBase()],
+  plugins: [devtools(), solidPlugin(), tailwindcss(), vitePluginGhPagesBase()],
   resolve: {
     alias: {
       '@': resolve(import.meta.dirname, 'src'),
